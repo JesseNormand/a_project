@@ -67,3 +67,17 @@ lm_fit <- lm_model %>%
 lm_fit
 
 summary(lm_fit$fit)
+
+par(mfrow=c(2,2)) # plot all 4 plots in one
+
+plot(lm_fit$fit, 
+     pch = 16,    # optional parameters to make points blue
+     col = '#006EA1')
+
+# Data frame of estimated coefficients
+tidy(lm_fit)
+
+# Performance metrics on training data
+glance(lm_fit)
+
+vip(lm_fit)
