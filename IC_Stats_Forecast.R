@@ -63,7 +63,7 @@ lm_model <- linear_reg() %>%
   set_mode('regression')
 
 lm_fit <- lm_model %>% 
-  fit(dat1$total_collected ~ dat1$estimator, data = dat_training)
+  fit(dat1$total_collected ~ dat1$job_code, data = dat_training)
 lm_fit
 
 summary(lm_fit$fit)
