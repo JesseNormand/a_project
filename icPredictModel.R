@@ -10,6 +10,14 @@ dat1 <- read.csv("clean.csv") %>% clean_names()
 attach(dat1)
 
 dat1$gross_margin <- NULL
+dat1$gp <- NULL
+dat1$estimator <- NULL
+
+dummy <- dummyVars("~.", dat1)
+
+dum_dat <- data.frame(predict(dummy, dat1))
+
+scale(dum_dat, center = TRUE, scale = TRUE)
 
 #Split data
 set.seed(123)
@@ -30,21 +38,29 @@ tc <- trainControl(method = "cv", number = 5)
 
 #Train model
 
-
-lm1 <- train(total_collected ~., data = dat_test, method = "glm")
+lm1 <- train(total_collected ~ job_code, data = dat_test, method = "glm")
 
 rf1 <- train(total_collected ~., data = dat_test, method = "rf", trControl = tc)
 
-xgb <- train(total_collected ~., data = dat_test, method = "XgbLinear", trControl = tc)
+xgb <- train(total_collected ~., data = dat_test, method = "xgbTree", trControl = tc)
 
 
 #Predict
 
-pred <- predict(lm1, dat_test[-3])
+pred <- predict(lm1, dat_test)
 
+predr <- predict(rf1, dat_test)
 
+#stats
+summary(lm1$finalModel)
 
+summary(rf1$finalModel)
 
+#R2
+
+lm1$results
+
+rf1$results
 
 
 #Chart
@@ -61,6 +77,7 @@ plot(lm1$finalModel,
      col = '#006EA1')
 
 roc_score <- roc(dat_test[,3], pred)
+
 
 plot(roc_score)
 
