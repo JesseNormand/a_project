@@ -123,9 +123,17 @@ grid()
 #Time series############################################
 library(fpp3)
 
+dat1 <- read.csv("clean_forcast.csv", header = TRUE) %>% clean_names()
+
+attach(dat1)
+
+dat1$month <- NULL
+
+dat1$date <- ymd(dat1$date)
+
 #declare time series
 
-time_s <- ts(dat1$revenue, start = c(2018,1), end = c(2022,3), frequency = 12)
+time_s <- ts(dat1$revenue, start = c(2019), end = c(2022,9), frequency = 12)
 
 ########################################################
 
@@ -150,27 +158,33 @@ ggsubseriesplot(dat_diff)
 #Forecast#######################
 #Benchmark: seasonal naive method y_t = y-ts + e
 
-fit <- snaive(time_s) #resid = $16,249
-print(summary(fit))
-checkresiduals(fit)
+fit_nai <- snaive(time_s) #resid = $172782.8152
+print(summary(fit_nai))
+checkresiduals(fit_nai)
+
+fit_nai_diff <- snaive(dat_diff) #resid = $183066.1944 
+print(summary(fit_nai_diff))
+checkresiduals(fit_nai_diff)
 
 
 #Fit Exponential model
-fit_exp <- ets(time_s) # sigma(same as residuals) $1.021
-print(fit_exp)
-checkresiduals(fit_exp)
+fit_exp_times <- ets(time_s) # sigma(same as residuals) $111667.9
+print(fit_exp_times)
+checkresiduals(fit_exp_times)
 
-fit_exp <- ets(dat_diff) #resid $15272.68
+fit_exp <- ets(dat_diff) #resid $ 129900
 print(fit_exp)
 checkresiduals(fit_exp)
 
 
 #Fit ARIMA model
-fit_arima_times <- auto.arima(time_s) #if we had trend and seasonality(d=1, D=1)
-print(fit_arima)
-checkresiduals(fit_arima)
+fit_arima_times <- auto.arima(time_s) #$109361.7
 
-fit_arima <- auto.arima(dat_diff, trace = TRUE) #resid(sqrt sigma that is squared) $12391.49
+#if we had trend and seasonality(d=1, D=1)
+print(fit_arima_times)
+checkresiduals(fit_arima_times)
+
+fit_arima <- auto.arima(dat_diff, trace = TRUE) #resid(sqrt sigma that is squared) $167402.2
      #if we had trend and seasonality(d=1, D=1)
 print(fit_arima)
 checkresiduals(fit_arima)
@@ -178,11 +192,20 @@ checkresiduals(fit_arima)
 ###################################
 #Forescast
 
-for_cat_ar <- forecast(fit_arima_times, h=24)
-autoplot(for_cat)
+for_cat_ar <- forecast(fit_arima_times, h=12)
+plot(for_cat_ar, type = "l", lwd = 2, col = "black",
+     main = "12 Monthy Revenue per Day Prediction", 
+     las = 1)
+     axis(3 , at=axTicks(2), labels = sprintf("$%s", axTicks(2)), las = 1)
+abline(h = 0, lwd = 1)
+grid()
 
-for_cat_ex <- forecast(fit_exp, h = 6)
+for_cat_ex <- forecast(fit_exp_times, h = 12)
 autoplot(for_cat_ex)
 
+for_cat_nai <- forecast(fit_nai_diff, h = 12)
+autoplot(fit_nai, ylab = "Revenue" , xlab = "Date") +
+  scale_y_continuous(labels=scales::dollar_format()) +
+  labs(title = "12 Month Forecast of Revenue per Month") + scale_x_date(date_labels = "%b-%d-%Y")
 
 
