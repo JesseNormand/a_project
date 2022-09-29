@@ -41,11 +41,32 @@ plot(dat1[,3:2], xlab = "year", ylab = "revenue",
 
 par(mfrow =c(2,1))
 
-plot(dat1[,1:2], xlab = "year", ylab = "revenue", type = "l",  lwd = 3, col = "blue")
+
+#Chart with min and max
+xmin <- min(dat1[,2])
+xmax <- max(dat1[,2])
+
+plot(dat1[,1:2], xlab = "year", ylab = "revenue",
+     type = "l",  
+     lwd = 3,
+     col = "blue")
+     grid()
+     abline(h=c(15000,30000), col = "red", lwd = 2)
+     abline(v=seq(xmin, xmax, 26), col = "black", lwd = 3)
+
+
 
 plot(dat1[,3:2], xlab = "year", ylab = "revenue",  type = "l", lwd = 3, col = "blue", 
      main = " IC Chart", 
      xlim = c())
+
+#boxplot
+boxplot(dat1$revenue ~ dat1$year, las = 1)
+grid()
+
+boxplot(dat1$revenue ~ dat1$month, las = 1)
+grid()
+     
 
 #Time series
 time_s <- ts(dat1, frequency= 12 , start = 2021, end = 2023)
