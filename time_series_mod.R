@@ -64,9 +64,60 @@ plot(dat1[,3:2], xlab = "year", ylab = "revenue",  type = "l", lwd = 3, col = "b
 boxplot(dat1$revenue ~ dat1$year, las = 1)
 grid()
 
-boxplot(dat1$revenue ~ dat1$month, las = 1)
+boxplot(dat1$revenue ~ dat1$month,
+        las = 1,
+        col ="blue")
+        grid()
+  
+boxplot(dat1$revenue ~ dat1$day,
+                las = 1,
+                col ="green")
+        grid()
+        
+#View where NAs are
+colSums(is.na(dat1))        
+        
+view_na <- dat1[which(is.na(dat1$revenue))]
+view_na
+
+#fill data with previous cell data
+library(tidyr)
+fill(dat1$revenue)
+
+#Trend compute rolling average:
+library(zoo)
+library(dplyr)
+
+roll_m <- dat1 %>% 
+  arrange(desc(date)) %>% 
+  group_by(year) %>% 
+  mutate(day7 = rollmean(revenue, k = 7, fill = NA),
+                                  rollavg_365 = rollmean(revenue, k = 365, fill = NA)) %>% ungroup()
+#Filter rolling average
+roll_m
+
+roll_m %>% arrange(year) %>% 
+  filter(year == 2021) %>% 
+  select(date,revenue) %>% 
+  head(10)
+
+roll_2021 <- roll_m %>% arrange(year) %>% 
+  filter(year == 2021) %>% 
+  select(date,revenue) %>% 
+  head(10)
+
+#plot rolling average
+roll_mean <- mean(na.omit(roll_m$day7))
+
+plot(roll_m$date, roll_m$rollavg_365,  xlab = "year", ylab = "revenue",  type = "l", lwd = 3, col = "blue", 
+     main = " 7 Day Rolling Average", 
+     xlim = c())
+abline(h =c(roll_mean), lwd = 2, col = "darkred")
+points(roll_m$day7, type = "l", col = "orange")
+legend(2022,6000,legend = c("1"))
 grid()
-     
+
+
 
 #Time series
 time_s <- ts(dat1, frequency= 12 , start = 2021, end = 2023)
