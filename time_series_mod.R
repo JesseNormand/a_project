@@ -1,5 +1,6 @@
 ##########load###########
 library(forecast)
+library(janitor)
 
 dat1 <- read.csv("clean_forcast.csv", header = TRUE) %>% clean_names()
 
@@ -119,20 +120,69 @@ grid()
 
 
 
-#Time series
-time_s <- ts(dat1, frequency= 12 , start = 2021, end = 2023)
+#Time series############################################
+library(fpp3)
 
-hw(dat1, seasonal = "additive")
+#declare time series
 
-plot(time_s)
+time_s <- ts(dat1$revenue, start = c(2018,1), end = c(2022,3), frequency = 12)
+
+########################################################
+
+#time plot
+autoplot(time_s)
 
 
-time_fit <- HoltWinters(time_s)
+#trend is stationary so we dont need to use diff  
+dat_diff <- diff(time_s)
 
-accuracy(time_fit)
+plot(dat_diff)
 
-forecast(
-  time_fit$x, 5
-)
-forecast( time_fit$x, h = 5, level = c(80, 95), fan = FALSE, 
-          lambda = NULL, biasadj = NULL)
+#check seasonality
+ggseasonplot(time_s)
+
+ggseasonplot(dat_diff)
+
+ggsubseriesplot(time_s)
+
+ggsubseriesplot(dat_diff)
+
+#Forecast#######################
+#Benchmark: seasonal naive method y_t = y-ts + e
+
+fit <- snaive(time_s) #resid = $16,249
+print(summary(fit))
+checkresiduals(fit)
+
+
+#Fit Exponential model
+fit_exp <- ets(time_s) # sigma(same as residuals) $1.021
+print(fit_exp)
+checkresiduals(fit_exp)
+
+fit_exp <- ets(dat_diff) #resid $15272.68
+print(fit_exp)
+checkresiduals(fit_exp)
+
+
+#Fit ARIMA model
+fit_arima_times <- auto.arima(time_s) #if we had trend and seasonality(d=1, D=1)
+print(fit_arima)
+checkresiduals(fit_arima)
+
+fit_arima <- auto.arima(dat_diff, trace = TRUE) #resid(sqrt sigma that is squared) $12391.49
+     #if we had trend and seasonality(d=1, D=1)
+print(fit_arima)
+checkresiduals(fit_arima)
+
+###################################
+#Forescast
+
+for_cat_ar <- forecast(fit_arima_times, h=24)
+autoplot(for_cat)
+
+for_cat_ex <- forecast(fit_exp, h = 6)
+autoplot(for_cat_ex)
+
+
+
