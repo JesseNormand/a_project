@@ -10,6 +10,7 @@ library(plumber)
 library(yaml)
 library(jsonlite)
 library(ggplot2)
+library(readr)
 
 #We will use post method to send JSON data 
 
@@ -28,9 +29,13 @@ function(){
 }
 
 #* Run model
-#* @serializer htmlwidget
+#* @serializer png 
 #* @get /ggplot
+#*  
 function() {
-  plot(model)
+  mod <- forecast(model)
+  print(autoplot(mod, ylab = "Revenue") +
+    scale_y_continuous(labels=scales::dollar_format()) +
+    labs(title = "24 Month Forecast of Revenue per Month"))
 }
 
