@@ -13,7 +13,7 @@ library(ggplot2)
 library(readr)
 library(rapidoc)
 
-#We will use post method to send JSON data 
+#We will use post method to send JSON data #
 
 ##########################################
 #Load Model
