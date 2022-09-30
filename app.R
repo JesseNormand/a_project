@@ -11,9 +11,14 @@ library(yaml)
 library(jsonlite)
 library(ggplot2)
 library(readr)
+<<<<<<< HEAD
 library(rapidoc)
 
 #We will use post method to send JSON data ##
+=======
+
+#We will use post method to send JSON data 
+>>>>>>> d0fdfd50b4d230651ffbade77cf3633273b5a5cf
 
 ##########################################
 #Load Model
