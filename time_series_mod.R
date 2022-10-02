@@ -129,6 +129,7 @@ attach(dat1)
 
 dat1$month <- NULL
 
+
 dat1$date <- ymd(dat1$date)
 
 #declare time series
@@ -192,6 +193,8 @@ checkresiduals(fit_arima)
 ###################################
 #Forescast
 
+for_cat_ar_diff <- forecast(fit_arima, h=12)
+
 for_cat_ar <- forecast(fit_arima_times, h=12)
 plot(for_cat_ar, type = "l", lwd = 2, col = "black",
      main = "12 Monthy Revenue per Day Prediction", 
@@ -203,9 +206,13 @@ grid()
 for_cat_ex <- forecast(fit_exp_times, h = 12)
 autoplot(for_cat_ex)
 
-for_cat_nai <- forecast(fit_nai_diff, h = 12)
-autoplot(fit_nai, ylab = "Revenue" , xlab = "Date") +
+for_cat_nai <- forecast(fit_nai_diff)
+autoplot(fit_nai, ylab = "Revenue") +
   scale_y_continuous(labels=scales::dollar_format()) +
-  labs(title = "12 Month Forecast of Revenue per Month") + scale_x_date(date_labels = "%b-%d-%Y")
+  labs(title = "24 Month Forecast of Revenue per Month")
+
+#####################################
+#save model
+saveRDS(fit_arima_times, file = "IC_arima_model2.rds")
 
 

@@ -22,7 +22,7 @@ scale(dum_dat, center = TRUE, scale = TRUE)
 #Split data
 set.seed(123)
 
-dat_split <- initial_split(dat1, prop = .80)
+dat_split <- initial_split(dum_dat, prop = .80)
 
 # Build training data set
 dat_training <- dat_split %>% 
@@ -38,11 +38,21 @@ tc <- trainControl(method = "cv", number = 5)
 
 #Train model
 
-lm1 <- train(total_collected ~ job_code, data = dat_test, method = "glm")
+lm1 <- train(total_collected ~ ., data = dat_test, method = "glm")
 
-rf1 <- train(total_collected ~., data = dat_test, method = "rf", trControl = tc)
+rf1 <- train(total_collected ~ ., data = dat_test, method = "rf", trControl = tc)
 
-xgb <- train(total_collected ~., data = dat_test, method = "xgbTree", trControl = tc)
+xgb <- train(total_collected ~ job_code + estimator, data = dat_test, method = "xgbTree", trControl = tc)
+
+
+#Tune model
+metric <- "Accuracy"
+mgrid <- expand.grid(.mtry=c(52))
+
+rf1 <- train(total_collected ~., data = dat_test, method = "rf", 
+             trControl = tc,
+             tuneGrid = mgrid)
+
 
 
 #Predict
@@ -50,6 +60,11 @@ xgb <- train(total_collected ~., data = dat_test, method = "xgbTree", trControl 
 pred <- predict(lm1, dat_test)
 
 predr <- predict(rf1, dat_test)
+
+#unscale
+library(grt)
+
+predr_unscal <- unscale(predr)
 
 #stats
 summary(lm1$finalModel)
@@ -61,6 +76,11 @@ summary(rf1$finalModel)
 lm1$results
 
 rf1$results
+
+#Plot
+dotplot(lm1$finalModel$fitted.values)
+
+dotplot(rf1$finalModel$importance)
 
 
 #Chart
@@ -76,7 +96,13 @@ plot(lm1$finalModel,
      pch = 16,    # optional parameters to make points blue
      col = '#006EA1')
 
-roc_score <- roc(dat_test[,3], pred)
+plot(rf1$finalModel, 
+     pch = 16,    # optional parameters to make points blue
+     col = '#006EA1')
+
+
+
+roc_score <- roc(dat_test[,3], predr)
 
 
 plot(roc_score)
